@@ -250,6 +250,7 @@ if mod:
     fnqma = mod.split('.')
     module_name = '.'.join(fnqma[:-1])
     class_name = fnqma[-1]
+    app.config['PREFERRED_URL_SCHEME'] = 'https',
     app.provisional = load_provisional(module_name, class_name)
     app.credentials = load_credentials()
     port = int(os.environ.get('PORT', 5000))
