@@ -245,18 +245,22 @@ def load_provisional(module_name, class_name):
     return Provisional()
 
 
-def main(arguments):
-    fnqma = arguments[0].split('.')
+mod = os.getenv('PROVISIONAL_MODULE', '')
+if mod:
+    fnqma = mod.split('.')
     module_name = '.'.join(fnqma[:-1])
     class_name = fnqma[-1]
     app.provisional = load_provisional(module_name, class_name)
     app.credentials = load_credentials()
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+else:
+    raise ImportError('Your have to define the append the fully qualified name '
+                      'of your provisional class in an ENV-variable PROVISIONAL_MODULE. ERR:22\n')
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
         sys.stderr.write('Your have to append the fully qualified name '
                          'of your provisional class. ERR:22\n')
         sys.exit(errno.EINVAL)
-    main(sys.argv[1:])
+
+    app.run(host='0.0.0.0', port=port)
