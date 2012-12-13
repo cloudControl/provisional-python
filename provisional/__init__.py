@@ -118,7 +118,7 @@ def health_check():
     except Exception as e:
         if hasattr(e, 'code') and e.code == 503 and not e.message is None:
             return (
-                        json_dump({'message', e.message}),
+                        json_dump({'message': e.message}),
                         e.code
                     )
         else:
@@ -138,7 +138,7 @@ def read(id):
     except Exception as e:
         if hasattr(e, 'code') and e.code == 503 and not e.message is None:
             return (
-                        json_dump({'message', e.message}),
+                        json_dump({'message': e.message}),
                         e.code
                     )
         else:
@@ -160,9 +160,9 @@ def create():
             return 'Internal Server Error', 500
         return json_dump(returnValue), 201
     except Exception as e:
-        if hasattr(e, 'code') and e.code == 503 and not e.message is None:
+        if hasattr(e, 'code') and e.code == 503 and hasattr(e, 'message') and not e.message is None:
             return (
-                        json_dump({'message', e.message}),
+                        json_dump({'message': e.message}),
                         e.code
                     )
         else:
@@ -191,7 +191,7 @@ def update(id):
     except Exception as e:
         if hasattr(e, 'code') and e.code == 503 and not e.message is None:
             return (
-                        json_dump({'message', e.message}),
+                        json_dump({'message': e.message}),
                         e.code
                     )
         else:
@@ -211,7 +211,7 @@ def delete(id):
     except Exception as e:
         if hasattr(e, 'code') and e.code == 503 and not e.message is None:
             return (
-                        json_dump({'message', e.message}),
+                        json_dump({'message': e.message}),
                         e.code
                     )
         else:
