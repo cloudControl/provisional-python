@@ -116,10 +116,16 @@ def health_check():
             return ' Service Unavailable', 503
         return 'Ok', 200
     except Exception as e:
-        return (
-            e.message if hasattr(e, 'message') else 'Internal Server Error',
-            e.code if hasattr(e, 'code') else 500
-        )
+        if hasattr(e, 'code') and e.code == 503 and not e.message is None:
+            return (
+                        json_dump({'message', e.message}),
+                        e.code
+                    )
+        else:
+            return (
+                e.message if hasattr(e, 'message') else 'Internal Server Error',
+                e.code if hasattr(e, 'code') else 500
+            )
 
 
 @app.route('/cloudcontrol/resources/<id>', methods=['GET'])
@@ -130,10 +136,16 @@ def read(id):
             return 'Not found', 404
         return json_dump(returnValue), 200
     except Exception as e:
-        return (
-            e.message if hasattr(e, 'message') else 'Internal Server Error',
-            e.code if hasattr(e, 'code') else 500
-        )
+        if hasattr(e, 'code') and e.code == 503 and not e.message is None:
+            return (
+                        json_dump({'message', e.message}),
+                        e.code
+                    )
+        else:
+            return (
+                e.message if hasattr(e, 'message') else 'Internal Server Error',
+                e.code if hasattr(e, 'code') else 500
+            )
 
 
 @app.route('/cloudcontrol/resources/', methods=['POST'])
@@ -148,10 +160,16 @@ def create():
             return 'Internal Server Error', 500
         return json_dump(returnValue), 201
     except Exception as e:
-        return (
-            e.message if hasattr(e, 'message') else 'Internal Server Error',
-            e.code if hasattr(e, 'code') else 500
-        )
+        if hasattr(e, 'code') and e.code == 503 and not e.message is None:
+            return (
+                        json_dump({'message', e.message}),
+                        e.code
+                    )
+        else:
+            return (
+                e.message if hasattr(e, 'message') else 'Internal Server Error',
+                e.code if hasattr(e, 'code') else 500
+            )
 
 
 @app.route('/cloudcontrol/resources/<id>', methods=['PUT'])
@@ -171,10 +189,16 @@ def update(id):
             return 'Not found', 404
         return json_dump(returnValue), 200
     except Exception as e:
-        return (
-            e.message if hasattr(e, 'message') else 'Internal Server Error',
-            e.code if hasattr(e, 'code') else 500
-        )
+        if hasattr(e, 'code') and e.code == 503 and not e.message is None:
+            return (
+                        json_dump({'message', e.message}),
+                        e.code
+                    )
+        else:
+            return (
+                e.message if hasattr(e, 'message') else 'Internal Server Error',
+                e.code if hasattr(e, 'code') else 500
+            )
 
 
 @app.route('/cloudcontrol/resources/<id>', methods=['DELETE'])
@@ -185,10 +209,16 @@ def delete(id):
             return 'Not found', 404
         return 'Ok', 204
     except Exception as e:
-        return (
-            e.message if hasattr(e, 'message') else 'Internal Server Error',
-            e.code if hasattr(e, 'code') else 500
-        )
+        if hasattr(e, 'code') and e.code == 503 and not e.message is None:
+            return (
+                        json_dump({'message', e.message}),
+                        e.code
+                    )
+        else:
+            return (
+                e.message if hasattr(e, 'message') else 'Internal Server Error',
+                e.code if hasattr(e, 'code') else 500
+            )
 
 
 def load_credentials():
