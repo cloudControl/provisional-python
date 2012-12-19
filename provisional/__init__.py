@@ -1,69 +1,74 @@
 import os
 import sys
+import logging
+import functools
 import errno
 from flask import Flask, request, Response
 import json
 
-'''
-    @author: Dimitris Verraros (dv@cloudcontrol.de)
-    @author: Denis Neuling (dn@cloudcontrol.de)
-    @author: Denis Cornehl (dc@cloudcontrol.de)
-'''
+app = Flask(__name__)
+
+logger = logging.getLogger(__name__)
+
+
+class ProvisionalError(Exception):
+    def __init__(self, code, message):
+        self._code = code
+        self._message = message
+
+
+class InternalServerError(ProvisionalError):
+    def __init__(self):
+        super(InternalServerError, self).__init__(500, 'Internal Server Error')
+
+
+class BadRequestError(ProvisionalError):
+    def __init__(self):
+        super(BadRequestError, self).__init__(400, 'Bad Request')
+
+
+class NotFoundError(ProvisionalError):
+    def __init__(self):
+        super(NotFoundError, self).__init__(404, 'Not found')
+
+
+class ProviderError(ProvisionalError):
+    def __init__(self, message):
+        super(ProviderError, self).__init__(503, json.dumps({'message': str(message)}))
 
 
 class Provisional():
-    '''
-        abstract dummy class
-    '''
-
     def read(self, id):
-        '''
-            dict
-        '''
-        e = Exception()
-        e.code = 404
-        e.message = 'Not found'
-        raise e
+        raise NotFoundError()
 
     def create(self, data):
-        '''
-            dict
-        '''
-        e = Exception()
-        e.code = 404
-        e.message = 'Not found'
-        raise e
+        raise NotFoundError()
 
     def update(self, id, data):
-        '''
-            dict
-                in case of
-        '''
-        e = Exception()
-        e.code = 404
-        e.message = 'Not found'
-        raise e
+        raise NotFoundError()
 
     def delete(self, id):
-        '''
-            dict
-                in case of
-            bool
-                in case of
-        '''
-        e = Exception()
-        e.code = 404
-        e.message = 'Not found'
-        raise e
+        raise NotFoundError()
 
     def health_check(self):
         return True
 
-'''
-    view
-'''
 
-app = Flask(__name__)
+def handle_exceptions(function):
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+
+        except ProvisionalError as e:
+            return e._message, e._code
+
+        except Exception as e:
+            logger.exception('{} {}'.format(type(e), str(e)))
+            pe = InternalServerError()
+            return pe._message, pe._code
+
+    return wrapper
 
 
 def check_auth(credentials, username, password):
@@ -109,116 +114,69 @@ def index():
 
 
 @app.route('/health-check', methods=['GET'])
+@handle_exceptions
 def health_check():
-    try:
-        health_check_value = app.provisional.health_check()
-        if health_check_value is None or health_check_value is False:
-            return ' Service Unavailable', 503
-        return 'Ok', 200
-    except Exception as e:
-        if hasattr(e, 'code') and e.code == 503 and not e.message is None:
-            return (
-                        json_dump({'message': e.message}),
-                        e.code
-                    )
-        else:
-            return (
-                e.message if hasattr(e, 'message') else 'Internal Server Error',
-                e.code if hasattr(e, 'code') else 500
-            )
+    health_check_value = app.provisional.health_check()
+    if health_check_value is None or health_check_value is False:
+        return 'Service Unavailable', 503
+    return 'Ok', 200
 
 
 @app.route('/cloudcontrol/resources/<id>', methods=['GET'])
+@handle_exceptions
 def read(id):
-    try:
-        returnValue = app.provisional.read(id=id)
-        if returnValue is None or returnValue is False:
-            return 'Not found', 404
-        return json_dump(returnValue), 200
-    except Exception as e:
-        if hasattr(e, 'code') and e.code == 503 and not e.message is None:
-            return (
-                        json_dump({'message': e.message}),
-                        e.code
-                    )
-        else:
-            return (
-                e.message if hasattr(e, 'message') else 'Internal Server Error',
-                e.code if hasattr(e, 'code') else 500
-            )
+    returnValue = app.provisional.read(id=id)
+    if returnValue is None or returnValue is False:
+        raise NotFoundError()
+
+    return json_dump(returnValue), 200
 
 
 @app.route('/cloudcontrol/resources/', methods=['POST'])
+@handle_exceptions
 def create():
     try:
-        try:
-            content = json.loads(request.data)
-        except TypeError:
-            return 'Bad Request', 400
-        returnValue = app.provisional.create(data=content)
-        if returnValue is None or returnValue is False:
-            return 'Internal Server Error', 500
-        return json_dump(returnValue), 201
-    except Exception as e:
-        if hasattr(e, 'code') and e.code == 503 and hasattr(e, 'message') and not e.message is None:
-            return (
-                        json_dump({'message': e.message}),
-                        e.code
-                    )
-        else:
-            return (
-                e.message if hasattr(e, 'message') else 'Internal Server Error',
-                e.code if hasattr(e, 'code') else 500
-            )
+        content = json.loads(request.data)
+    except TypeError:
+        raise BadRequestError()
+
+    returnValue = app.provisional.create(data=content)
+    if returnValue is None or returnValue is False:
+        raise InternalServerError()
+
+    return json_dump(returnValue), 201
 
 
 @app.route('/cloudcontrol/resources/<id>', methods=['PUT'])
+@handle_exceptions
 def update(id):
     try:
-        try:
-            content = json.loads(request.data)
-        except TypeError:
-            return 'Bad Request', 400
-        returnValue = app.provisional.update(
-            id=id,
-            data=content
-        )
-        if returnValue is None:
-            return 'Internal Server Error', 500
-        if returnValue is False:
-            return 'Not found', 404
-        return json_dump(returnValue), 200
-    except Exception as e:
-        if hasattr(e, 'code') and e.code == 503 and not e.message is None:
-            return (
-                        json_dump({'message': e.message}),
-                        e.code
-                    )
-        else:
-            return (
-                e.message if hasattr(e, 'message') else 'Internal Server Error',
-                e.code if hasattr(e, 'code') else 500
-            )
+        content = json.loads(request.data)
+    except TypeError:
+        raise BadRequestError()
+
+    returnValue = app.provisional.update(
+        id=id,
+        data=content
+    )
+
+    if returnValue is None:
+        raise InternalServerError()
+
+    if returnValue is False:
+        raise NotFoundError()
+
+    return json_dump(returnValue), 200
 
 
 @app.route('/cloudcontrol/resources/<id>', methods=['DELETE'])
+@handle_exceptions
 def delete(id):
-    try:
-        response = app.provisional.delete(id=id)
-        if response is None or response is False:
-            return 'Not found', 404
-        return 'Ok', 204
-    except Exception as e:
-        if hasattr(e, 'code') and e.code == 503 and not e.message is None:
-            return (
-                        json_dump({'message': e.message}),
-                        e.code
-                    )
-        else:
-            return (
-                e.message if hasattr(e, 'message') else 'Internal Server Error',
-                e.code if hasattr(e, 'code') else 500
-            )
+    response = app.provisional.delete(id=id)
+    if response is None or response is False:
+        raise NotFoundError()
+
+    return 'Ok', 204
 
 
 def load_credentials():
