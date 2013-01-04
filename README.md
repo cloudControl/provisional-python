@@ -32,7 +32,7 @@ CloudControl's python addon provisional wrapper.
         def __init__(self):
             super(Provisional, self).__init__()
 
-        def read(self, id):
+        def read(self, resource_id):
             '''
                 read is disabled for this addon
             '''
@@ -43,22 +43,22 @@ CloudControl's python addon provisional wrapper.
 
         def create(self, data):
             '''
-                dict
+                creation is disabled
             '''
             e = Exception()
             e.code = 404
             e.message = 'Not found' 
             raise e
 		
-        def update(self, id, data):
+        def update(self, resource_id, data):
             '''
-                do some business logic
+                do some business logic here
             '''
             return data
 	
-        def delete(self, id):
+        def delete(self, resource_id):
             '''
-                do some business logic
+                delete succeeded
             '''
             return True
 	
@@ -78,7 +78,7 @@ CloudControl's python addon provisional wrapper.
 ### Provisional Methodology Specs
 ---
 
-  * #### def read(self, id):
+  * #### def read(self, resource_id):
 >	*The 'read' method access the resource with the specified id.*
 >
 >	*(this function is optional - raises by default* Exception(404, Not Found) )
@@ -86,7 +86,7 @@ CloudControl's python addon provisional wrapper.
     * arguments
 <ul>
 <li>   *self - the object itself - self explanatory*</li>
-<li>   *id - the resources id - the resource to update with the concerning id*</li>
+<li>   *resource_id - the resources id - the resource to update with the concerning id*</li>
 </ul>
     * returns Object
 <ul>
@@ -112,7 +112,7 @@ CloudControl's python addon provisional wrapper.
     * returns Object
 <ul>
 <li>  *serializable object - if given - the resource which was just created*</li>
-<li>  *None - means somethign went wrong*</li>
+<li>  *None - means something went wrong*</li>
 </ul>
     * raises Exception
 <ul>
@@ -122,7 +122,7 @@ CloudControl's python addon provisional wrapper.
 
 
 
-  * #### def update(self, id, data):
+  * #### def update(self, resource_id, data):
 >	*The 'update' method updates the resource with the given id.*
 >
 >	*(this function is optional - raises by default* Exception(404, Not Found) )
@@ -130,7 +130,7 @@ CloudControl's python addon provisional wrapper.
     * arguments
 <ul>
 <li>  *self - self explanatory*</li>
-<li>  *id - the resources id - the resource to update with the concerning id*</li>
+<li>  *resource_id - the resources id - the resource to update with the concerning id*</li>
 <li>  *data*</li>
 </ul>
     * returns Object
@@ -144,7 +144,7 @@ CloudControl's python addon provisional wrapper.
 <li>  *exception.code - if given - defines the response code of the http response*</li>
 </ul>
 
-  * #### def delete(self, id):
+  * #### def delete(self, resource_id):
 >	*The 'delete' method access the resource with the specified id.*
 >
 >	*(this function is optional - raises by default* Exception(404, Not Found) )
@@ -152,7 +152,7 @@ CloudControl's python addon provisional wrapper.
     * arguments
 <ul>
 <li>  *self - the object itself - self explanatory*</li>
-<li>  *id - the resources id - the resource to delete with the concerning id*</li>
+<li>  *resource_id - the resources id - the resource to delete with the concerning id*</li>
 </ul>
     * returns Boolean
 <ul>

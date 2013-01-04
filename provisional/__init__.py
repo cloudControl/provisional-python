@@ -38,16 +38,16 @@ class ProviderError(ProvisionalError):
 
 
 class Provisional():
-    def read(self, id):
+    def read(self, resource_id):
         raise NotFoundError()
 
     def create(self, data):
         raise NotFoundError()
 
-    def update(self, id, data):
+    def update(self, resource_id, data):
         raise NotFoundError()
 
-    def delete(self, id):
+    def delete(self, resource_id):
         raise NotFoundError()
 
     def health_check(self):
@@ -122,10 +122,10 @@ def health_check():
     return 'Ok', 200
 
 
-@app.route('/cloudcontrol/resources/<id>', methods=['GET'])
+@app.route('/cloudcontrol/resources/<resource_id>', methods=['GET'])
 @handle_exceptions
-def read(id):
-    returnValue = app.provisional.read(id=id)
+def read(resource_id):
+    returnValue = app.provisional.read(resource_id=resource_id)
     if returnValue is None or returnValue is False:
         raise NotFoundError()
 
@@ -147,16 +147,16 @@ def create():
     return json_dump(returnValue), 201
 
 
-@app.route('/cloudcontrol/resources/<id>', methods=['PUT'])
+@app.route('/cloudcontrol/resources/<resource_id>', methods=['PUT'])
 @handle_exceptions
-def update(id):
+def update(resource_id):
     try:
         content = json.loads(request.data)
     except TypeError:
         raise BadRequestError()
 
     returnValue = app.provisional.update(
-        id=id,
+        resource_id=resource_id,
         data=content
     )
 
@@ -169,10 +169,10 @@ def update(id):
     return json_dump(returnValue), 200
 
 
-@app.route('/cloudcontrol/resources/<id>', methods=['DELETE'])
+@app.route('/cloudcontrol/resources/<resource_id>', methods=['DELETE'])
 @handle_exceptions
-def delete(id):
-    response = app.provisional.delete(id=id)
+def delete(resource_id):
+    response = app.provisional.delete(resource_id=resource_id)
     if response is None or response is False:
         raise NotFoundError()
 
