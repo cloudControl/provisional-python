@@ -180,17 +180,9 @@ def delete(resource_id):
 
 
 def load_credentials():
-    try:
-        app_name = os.environ['DEP_NAME'].split('/')[0]
-    except KeyError as ke:
-        # not on cloudcontrol?
-        sys.stderr.write("It seems that this application isn't running on "
-                         "cloudControl PaaS, is it? Environment "
-                         "KeyError: {0}. ERR:35\n".format(ke.message))
-        sys.exit(errno.EDEADLK)
-
+    domain = os.environ['DOMAIN']
     credentials_file = 'cloudcontrol-addon-manifest.'\
-        '{0}.json'.format(app_name)
+        '{0}.json'.format(domain)
     if os.path.isfile(credentials_file):
         try:
             with open(credentials_file, 'r') as contents:
