@@ -1,28 +1,31 @@
 # provisional.py
 
-CloudControl's python addon provisional wrapper.
+CloudControl's python addon [provisional](https://github.com/cloudControl/provisional)
+wrapper.
 
 ### Usage
----
 
 1. Write your addon manifest.
-   To get more informations about how to, have a look at cloudControl's [Add-on Provider Program](https://www.cloudcontrol.com/add-on-provider-program)
+   To get more informations about how to, have a look at cloudControl's
+   [Add-on Provider Program](https://www.cloudcontrol.com/add-on-provider-program)
 
 
 2. Install cloudcontrol's provisional.py
 
-        $ pip install git+git://github.com/cloudControl/provisional-python.git@master
+    ``` sh
+    $ pip install git+git://github.com/cloudControl/provisional-python.git@master
+    ```
 
-        Or add it as git submodule to your own addon provisional project
+    Or add it as git submodule to your own addon provisional project
 
-        $ git submodule add https://github.com/cloudControl/provisional-python.git provisional
-
->       *Notice: If you chose the submodule's way the README's way may vary.*
+    ``` sh
+    $ git submodule add https://github.com/cloudControl/provisional-python.git provisional
+    ```
 
 
 3. Implement your addon provisional Class
 
-``` python
+    ``` python
     # -*- coding: utf-8 -*-
     # file: my_addon_provisional.py
 
@@ -38,7 +41,7 @@ CloudControl's python addon provisional wrapper.
             '''
             e = Exception()
             e.code = 404
-            e.message = 'Not found' 
+            e.message = 'Not found'
             raise e
 
         def create(self, data):
@@ -47,143 +50,107 @@ CloudControl's python addon provisional wrapper.
             '''
             e = Exception()
             e.code = 404
-            e.message = 'Not found' 
+            e.message = 'Not found'
             raise e
-		
+
         def update(self, resource_id, data):
             '''
                 do some business logic here
             '''
             return data
-	
+
         def delete(self, resource_id):
             '''
                 delete succeeded
             '''
             return True
-	
+
         def health_check(self):
             return True
-
-```
+    ```
 
 
 4. Write your Procfile
 
-``` text
-
-        web: python -m provisional my_addon_provisional.MyAddonProvisional
-```
+    ``` text
+    web: python -m provisional my_addon_provisional.MyAddonProvisional
+    ```
 
 ### Provisional Methodology Specs
----
 
-  * #### def read(self, resource_id):
->	*The 'read' method access the resource with the specified id.*
->
->	*(this function is optional - raises by default* Exception(404, Not Found) )
+#### def read(self, resource_id):
 
-    * arguments
-<ul>
-<li>   *self - the object itself - self explanatory*</li>
-<li>   *resource_id - the resources id - the resource to update with the concerning id*</li>
-</ul>
-    * returns Object
-<ul>
-<li>   *serializable object - if given - the just updated entity*</li>
-</ul>
-    * raises Exception
-<ul>
-<li>  *exception.message - if given - defines the message of the http response*</li>
-<li>  *exception.code - if given - defines the response code of the http response*</li>
-</ul>
+The 'read' method access the resource with the specified id.
 
+(function is optional - raises by default Exception(404, Not Found))
 
-  * #### def create(self, data):
->	*The 'create' method creates the resource with specific properties.*
->
->	*(this function is optional - raises by default* Exception(404, Not Found) )
+* arguments
+  * resource_id - the resources id - the resource to update with the concerning id
 
-    * arguments
-<ul>
-<li>  *self - the object itself - self explanatory*</li>
-<li>  *data - the resource to create*</li>
-</ul>
-    * returns Object
-<ul>
-<li>  *serializable object - if given - the resource which was just created*</li>
-<li>  *None - means something went wrong*</li>
-</ul>
-    * raises Exception
-<ul>
-<li>  *exception.message - if given - defines the message of the http response*</li>
-<li>  *exception.code - if given - defines the response code of the http response*</li>
-</ul>
+* returns Object
+  * serializable object - if given - the just updated entity
 
+* raises Exception
+  * exception.message - if given - defines the message of the http response
+  * exception.code - if given - defines the response code of the http response
 
+#### def create(self, data):
 
-  * #### def update(self, resource_id, data):
->	*The 'update' method updates the resource with the given id.*
->
->	*(this function is optional - raises by default* Exception(404, Not Found) )
+The 'create' method creates the resource with specific properties.
 
-    * arguments
-<ul>
-<li>  *self - self explanatory*</li>
-<li>  *resource_id - the resources id - the resource to update with the concerning id*</li>
-<li>  *data*</li>
-</ul>
-    * returns Object
-<ul>
-<li>  *serializable object - if given - the just updated entity*</li>
-<li>  *None* return 'Internal Server Error', 500</li>
-</ul>
-    * raises Exception
-<ul>
-<li>  *exception.message - if given - defines the message of the http response*</li>
-<li>  *exception.code - if given - defines the response code of the http response*</li>
-</ul>
+(function is optional - raises by default Exception(404, Not Found))
 
-  * #### def delete(self, resource_id):
->	*The 'delete' method access the resource with the specified id.*
->
->	*(this function is optional - raises by default* Exception(404, Not Found) )
+* arguments
+  * data - the resource to create
 
-    * arguments
-<ul>
-<li>  *self - the object itself - self explanatory*</li>
-<li>  *resource_id - the resources id - the resource to delete with the concerning id*</li>
-</ul>
-    * returns Boolean
-<ul>
-<li>  *True - if given - means the deletion of the concerning resource succeeded*</li>
-<li>  *False - if given - means the deletion of the concerning resource failed*</li>
-<li>  *None - means the deletion of the concerning resource failed*</li>
-</ul>
-    * raises Exception
-<ul>
-<li>  *exception.message - if given - defines the message of the http response*</li>
-<li>  *exception.code - if given - defines the response code of the http response*</li>
-</ul>
+* returns Object
+  * serializable object - if given - the resource which was just created
+  * None - means something went wrong
 
+#### def update(self, resource_id, data):
 
-  * #### def health_check(self):
->	*Through the 'health_check' method you can perform some dependency checks*
->	*which should not fail to serve the provisioning*
->
->	*(this function is optional - returns by default* True )
+The 'update' method updates the resource with the given id.
 
-    * arguments
-<ul>
-<li> *self - the object itself - self explanatory*</li>
-</ul>
-    * returns Boolean
-<ul>
-<li>  *True - if given - means the health_check succeeded and the server is reachable*</li>
-<li>  *False - if given - means the health_check failed and the server is not reachable*</li>
-<li>  *None - means the health_check failed and the server is not reachable*</li>
-</ul>
-    * raises Exception
-<ul>
-<li> *If an execption raises the server will be* HTTP 503 SERVICE UNAVAILABLE</li>
-</ul>
+(function is optional - raises by default Exception(404, Not Found))
+
+* arguments
+  * resource_id - the resources id - the resource to update with the concerning id
+  * data
+
+* returns Object
+  * serializable object - if given - the just updated entity
+  * None
+    * return 'Internal Server Error', 500
+
+* raises Exception
+  * exception.message - if given - defines the message of the http response
+  * exception.code - if given - defines the response code of the http response
+
+#### def delete(self, resource_id):
+
+The 'delete' method deletes the resource with the specified id.
+
+(function is optional - raises by default Exception(404, Not Found))
+
+* arguments
+  * resource_id - the resources id - the resource to delete with the concerning id
+
+* returns Boolean
+  * True if success
+
+* raises Exception
+  * exception.message - if given - defines the message of the http response
+  * exception.code - if given - defines the response code of the http response
+
+#### def health_check(self):
+
+Through the 'health_check' method you can perform some dependency checks.
+which should not fail to serve the provisioning
+
+(function is optional - returns by default True )
+
+* returns Boolean
+  * True if success
+
+* raises Exception
+  * If an execption raises the server will be HTTP 503 SERVICE UNAVAILABLE
