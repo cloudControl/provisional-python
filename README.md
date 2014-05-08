@@ -1,156 +1,100 @@
-# provisional.py
+# provisional-python
 
-CloudControl's python addon [provisional](https://github.com/cloudControl/provisional)
-wrapper.
+provisional-python is a Flask skeleton app for the add-on provisioning
+API and can be used by cloudControl service providers.
 
-### Usage
+Detailed documentation on how to join the cloudControl Addon-on Provider
+Program and the business process can be found here:
 
-1. Write your addon manifest.
-   To get more informations about how to, have a look at cloudControl's
-   [Add-on Provider Program](https://www.cloudcontrol.com/add-on-provider-program)
+https://www.cloudcontrol.com/add-on-provider-program
 
+The PHP version can be found here:
 
-2. Install cloudcontrol's provisional.py
-
-    ``` sh
-    $ pip install git+git://github.com/cloudControl/provisional-python.git@master
-    ```
-
-    Or add it as git submodule to your own addon provisional project
-
-    ``` sh
-    $ git submodule add https://github.com/cloudControl/provisional-python.git provisional
-    ```
+https://github.com/cloudcontrol/provisional
 
 
-3. Implement your addon provisional Class
+## Usage
 
-    ``` python
-    # -*- coding: utf-8 -*-
-    # file: my_addon_provisional.py
+### Install provisional-python
 
-    from provisional import Provisional
-
-    class MyAddonProvisional(Provisional):
-        def __init__(self):
-            super(Provisional, self).__init__()
-
-        def read(self, resource_id):
-            '''
-                read is disabled for this addon
-            '''
-            e = Exception()
-            e.code = 404
-            e.message = 'Not found'
-            raise e
-
-        def create(self, data):
-            '''
-                creation is disabled
-            '''
-            e = Exception()
-            e.code = 404
-            e.message = 'Not found'
-            raise e
-
-        def update(self, resource_id, data):
-            '''
-                do some business logic here
-            '''
-            return data
-
-        def delete(self, resource_id):
-            '''
-                delete succeeded
-            '''
-            return True
-
-        def health_check(self):
-            return True
-    ```
+``` sh
+pip install git+git://github.com/cloudControl/provisional-python.git@master
+```
 
 
-4. Write your Procfile
+### Build your addon provisional class
 
-    ``` text
-    web: python -m provisional my_addon_provisional.MyAddonProvisional
-    ```
+``` python
+# file: my_addon.py
 
-### Provisional Methodology Specs
+from provisional import app, Provisional
 
-#### def read(self, resource_id):
+@app.route_provisional
+class MyAddonProvisional(Provisional):
 
-The 'read' method access the resource with the specified id.
+    def create(self, data):
+        """Create addon
 
-(function is optional - raises by default Exception(404, Not Found))
+        create() is called on each provisioning request. data is a
+        dictionary containing the parsed request body.
 
-* arguments
-  * resource_id - the resources id - the resource to update with the concerning id
+        Use the provided data to provision your service.
 
-* returns Object
-  * serializable object - if given - the just updated entity
+        Finally you have to return a dictionary as below.
 
-* raises Exception
-  * exception.message - if given - defines the message of the http response
-  * exception.code - if given - defines the response code of the http response
+        Make sure "config" list all config variables as defined
+        in your manifest file.
+        """
 
-#### def create(self, data):
+        return {
+            "id": "YOUR_INTERNAL_ID",
+            "config": {
+                "MYADDON_VAR": "VALUE"
+            }
+        }
 
-The 'create' method creates the resource with specific properties.
 
-(function is optional - raises by default Exception(404, Not Found))
+    def update(self, resource_id, data):
+        """Update addon
 
-* arguments
-  * data - the resource to create
+        update() gets called on each plan change and gets passed
+        both the id you returned upon provisioning (YOUR_INTERNAL_ID)
+        and the request data as dictionary.
 
-* returns Object
-  * serializable object - if given - the resource which was just created
-  * None - means something went wrong
+        If there's only one plan for your addon, you don't have to
+        implement update.
 
-#### def update(self, resource_id, data):
+        The response is similar to the one from create() but without
+        the id.
+        """
 
-The 'update' method updates the resource with the given id.
+        return {
+            "config": {
+                "MYADDON_VAR": "VALUE"
+            }
+        }
 
-(function is optional - raises by default Exception(404, Not Found))
+    def delete(self, resource_id):
+        """ Delete addon
 
-* arguments
-  * resource_id - the resources id - the resource to update with the concerning id
-  * data
+        Should return 'True' on sucess.
+        """
 
-* returns Object
-  * serializable object - if given - the just updated entity
-  * None
-    * return 'Internal Server Error', 500
+        return True
 
-* raises Exception
-  * exception.message - if given - defines the message of the http response
-  * exception.code - if given - defines the response code of the http response
+    def get_credentials(self)
+        """Provide addon credentials
 
-#### def delete(self, resource_id):
+        Is expected to return a tuple (addon_id, password) which
+        is used by provisional-python to authenticate all requests.
+        """
 
-The 'delete' method deletes the resource with the specified id.
+        return ('ADDON_ID', 'SECRET')
+```
 
-(function is optional - raises by default Exception(404, Not Found))
+#### Error handling
 
-* arguments
-  * resource_id - the resources id - the resource to delete with the concerning id
+To communicate an error, you should raise either `UnprocessableEntity`
+or `ServiceUnavailable` as defined in werkzeug.exceptions:
 
-* returns Boolean
-  * True if success
-
-* raises Exception
-  * exception.message - if given - defines the message of the http response
-  * exception.code - if given - defines the response code of the http response
-
-#### def health_check(self):
-
-Through the 'health_check' method you can perform some dependency checks.
-which should not fail to serve the provisioning
-
-(function is optional - returns by default True )
-
-* returns Boolean
-  * True if success
-
-* raises Exception
-  * If an execption raises the server will be HTTP 503 SERVICE UNAVAILABLE
+https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/exceptions.py
