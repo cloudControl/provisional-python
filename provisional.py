@@ -4,8 +4,14 @@ from flask import Flask, request, Response
 from flask_sslify import SSLify
 import json
 
-app = Flask(__name__)
-app.provisional = None  # set this to an instance of your Provisional subclass
+
+class ProvisionalFlask(Flask):
+    provisional = None
+
+    def route_provisonal(self, cls):
+        self.provisional = cls()
+
+app = ProvisionalFlask(__name__)
 SSLify(app)
 
 
