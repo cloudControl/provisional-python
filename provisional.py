@@ -1,15 +1,9 @@
-import os
-import sys
-import logging
 import functools
-import errno
 from flask import Flask, request, Response
 import json
 
 app = Flask(__name__)
 app.provisional = None  # set this to an instance of your Provisional subclass
-
-logger = logging.getLogger(__name__)
 
 
 class ProvisionalError(Exception):
