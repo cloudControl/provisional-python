@@ -1,10 +1,12 @@
 import functools
 from werkzeug.exceptions import HTTPException
 from flask import Flask, request, Response
+from flask_sslify import SSLify
 import json
 
 app = Flask(__name__)
 app.provisional = None  # set this to an instance of your Provisional subclass
+SSLify(app)
 
 
 class Provisional(object):

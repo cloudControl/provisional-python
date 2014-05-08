@@ -8,6 +8,9 @@ setup(
     author='cloudControl Team',
     author_email='info@cloudcontrol.de',
     license='Apache 2.0',
-    install_requires=['flask'],
+    install_requires=[
+        'flask',
+        'flask-sslify'
+    ],
     py_modules=['provisional'],
 )
