@@ -1,26 +1,10 @@
 import functools
+from werkzeug.exceptions import HTTPException
 from flask import Flask, request, Response
 import json
 
 app = Flask(__name__)
 app.provisional = None  # set this to an instance of your Provisional subclass
-
-
-class ProvisionalError(Exception):
-    def __init__(self, code, message):
-        Exception.__init__(self, message)
-        self.code = code
-        self.message = message
-
-
-class UnprocessableEntityError(ProvisionalError):
-    def __init__(self, message):
-        ProvisionalError.__init__(self, 422, json.dumps({'message': str(message)}))
-
-
-class ProviderError(ProvisionalError):
-    def __init__(self, message):
-        super(ProviderError, self).__init__(503, json.dumps({'message': str(message)}))
 
 
 class Provisional(object):
@@ -42,8 +26,8 @@ def handle_exceptions(function):
     def wrapper(*args, **kwargs):
         try:
             return function(*args, **kwargs)
-        except ProvisionalError as e:
-            return e.message, e.code
+        except HTTPException as e:
+            return json.dumps({'message': str(e.description)}), e.code
 
     return wrapper
 
