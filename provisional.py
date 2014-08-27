@@ -8,7 +8,7 @@ import json
 class ProvisionalFlask(Flask):
     provisional = None
 
-    def route_provisonal(self, cls):
+    def route_provisional(self, cls):
         self.provisional = cls()
 
 app = ProvisionalFlask(__name__)
