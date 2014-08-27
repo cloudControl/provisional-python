@@ -98,3 +98,11 @@ To communicate an error, you should raise either `UnprocessableEntity`
 or `ServiceUnavailable` as defined in werkzeug.exceptions:
 
 https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/exceptions.py
+
+### Add a Procfile
+
+Example:
+
+```
+web: gunicorn -b 0.0.0.0:$PORT -w $(ncproc) 'myapplication:app'
+```
