@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='provisional',
-    version='0.2',
+    version='0.2.1',
     description='Flask skeleton app for add-on provisioning API',
     url='http://github.com/cloudControl/provisional-python',
     author='cloudControl Team',
