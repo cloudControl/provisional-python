@@ -1,9 +1,9 @@
 # provisional-python
 
-provisional-python is a Flask skeleton app for the add-on provisioning
+provisional-python is a Flask blueprint for the add-on provisioning
 API and can be used by cloudControl service providers.
 
-Detailed documentation on how to join the cloudControl Addon-on Provider
+Detailed documentation on how to join the cloudControl Add-on Provider
 Program and the business process can be found here:
 
 https://www.cloudcontrol.com/add-on-provider-program
@@ -18,7 +18,7 @@ https://github.com/cloudcontrol/provisional
 ### Install provisional-python
 
 ``` sh
-pip install git+git://github.com/cloudControl/provisional-python.git@master
+pip install git+git://github.com/cloudControl/provisional-python.git@VERSION
 ```
 
 
@@ -26,11 +26,13 @@ pip install git+git://github.com/cloudControl/provisional-python.git@master
 
 ``` python
 # file: my_addon.py
+from flask import Flask
+from provisional import handle_provisional
 
-from provisional import app, Provisional
+app = Flask(__name__)
 
-@app.route_provisional
-class MyAddonProvisional(Provisional):
+@handle_provisional(app)
+class MyAddonProvisional(object):
 
     def create(self, data):
         """Create addon

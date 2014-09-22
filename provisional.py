@@ -1,18 +1,27 @@
 import functools
 from werkzeug.exceptions import HTTPException
-from flask import Flask, request, Response
+from flask import Blueprint, request, Response
 from flask_sslify import SSLify
 import json
 
 
-class ProvisionalFlask(Flask):
-    provisional = None
+class ProvisionalBlueprint(Blueprint):
+    def __init__(self):
+        Blueprint.__init__(self, 'provisional', __name__)
+        self.provisional = None
+        SSLify(self)
 
-    def route_provisional(self, cls):
-        self.provisional = cls()
+blueprint = ProvisionalBlueprint()
 
-app = ProvisionalFlask(__name__)
-SSLify(app)
+
+def handle_provisional(app=None):
+    def wrapped(cls):
+        blueprint.provisional = cls()
+
+        if app:
+            app.register_blueprint(blueprint)
+
+    return wrapped
 
 
 class Provisional(object):
@@ -40,9 +49,9 @@ def handle_exceptions(function):
     return wrapper
 
 
-@app.before_request
-def before():
-    addon_id, password = app.provisional.get_credentials()
+@blueprint.before_request
+def check_credentials():
+    addon_id, password = blueprint.provisional.get_credentials()
 
     auth = request.authorization
     if auth and auth.username == addon_id and auth.password == password:
@@ -54,18 +63,18 @@ def before():
     )
 
 
-@app.route('/cloudcontrol/resources/', methods=['POST'])
+@blueprint.route('/cloudcontrol/resources/', methods=['POST'])
 @handle_exceptions
 def create():
-    result = app.provisional.create(data=request.get_json())
+    result = blueprint.provisional.create(data=request.get_json())
 
     return json.dumps(result), 201
 
 
-@app.route('/cloudcontrol/resources/<resource_id>', methods=['PUT'])
+@blueprint.route('/cloudcontrol/resources/<resource_id>', methods=['PUT'])
 @handle_exceptions
 def update(resource_id):
-    result = app.provisional.update(
+    result = blueprint.provisional.update(
         resource_id=resource_id,
         data=request.get_json()
     )
@@ -73,9 +82,9 @@ def update(resource_id):
     return json.dumps(result), 200
 
 
-@app.route('/cloudcontrol/resources/<resource_id>', methods=['DELETE'])
+@blueprint.route('/cloudcontrol/resources/<resource_id>', methods=['DELETE'])
 @handle_exceptions
 def delete(resource_id):
-    app.provisional.delete(resource_id=resource_id)
+    blueprint.provisional.delete(resource_id=resource_id)
 
     return 'OK', 200
